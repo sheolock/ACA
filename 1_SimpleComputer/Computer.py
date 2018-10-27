@@ -71,7 +71,7 @@ class Computer(object):
 
     def jal(self, rd, label):
         self._save(rd, (self.reg_pc.load(0) + 1))
-        self.reg_pc.save(0, label)
+        self.reg_pc.save(0, int(label))
         return
 
     '''
@@ -86,30 +86,38 @@ class Computer(object):
     rd:     PC register's content +1
     pc:     rs1+imm
     '''
+
     def jalr(self, rd, rs1, imm):
         self._save(rd, (self.reg_pc.load(0) + 1))
         self.reg_pc.save(0, (int(self._load(rs1)) + int(imm)))
         return
 
     '''
-    Conditional jump instruction
+    Conditional jump instruction, to jump when rs1 == rs2
 
-    input:  jal rd,label
-    rd:     general register, such as r1
+    input:  beq rs1,rs2,label
     rs1:    general register, such as r1
-    imm:    
+    rs2:    general register, such as r1
+    label:  the row you want to jump
 
     output:
     rd:PC register's content +1
     '''
+
     def beq(self, rs1, rs2, label):
-        pass
+        if self._load(rs1) == self._load(rs2):
+            self.reg_pc.save(0, int(label))
+        return
 
     def bne(self, rs1, rs2, label):
-        pass
+        if self._load(rs1) != self._load(rs2):
+            self.reg_pc.save(0, int(label))
+        return
 
     def blt(self, rs1, rs2, label):
-        pass
+        if self._load(rs1) < self._load(rs2):
+            self.reg_pc.save(0, int(label))
+        return
 
     def bltu(self, rs1, rs2, label):
         pass
@@ -120,28 +128,28 @@ class Computer(object):
     def bgeu(self, rs1, rs2, label):
         pass
 
-    def lw(self,rd,rs1):
+    def lw(self, rd, rs1):
         pass
 
-    def lh(self,rd,rs1):
+    def lh(self, rd, rs1):
         pass
 
-    def lhu(self,rd,rs1):
+    def lhu(self, rd, rs1):
         pass
 
-    def lb(self,rd,rs1):
+    def lb(self, rd, rs1):
         pass
 
-    def lbu(self,rd,rs1):
+    def lbu(self, rd, rs1):
         pass
 
-    def sw(self,rd,rs1):
+    def sw(self, rd, rs1):
         pass
 
-    def sh(self,rd,rs1):
+    def sh(self, rd, rs1):
         pass
 
-    def sb(self,rd,rs1):
+    def sb(self, rd, rs1):
         pass
 
     def _load(self, _operand):
