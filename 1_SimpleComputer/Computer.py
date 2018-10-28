@@ -1,12 +1,12 @@
 import Register
-import Memory_file
+import Memory
 
 
 class Computer(object):
     def __init__(self):
         self.register = Register.Register()
         self.reg_pc = Register.Register(amount=1, content=0)
-        self.memory = Memory_file.Memory()
+        self.memory = Memory.Memory()
         self.start()
 
     def instruction_decode(self, ins):
@@ -58,15 +58,16 @@ class Computer(object):
         return
 
     '''
-    Unconditional jump instruction
-    
-    input:  jal rd,label
-    rd:     general register, such as r1
-    label:  the row you want to jump
-    
-    output:
-    rd:     PC register's content +1
-    pc:     label
+        Unconditional jump instruction
+        
+        input:  
+            jal rd,label
+            rd:     general register, such as r1
+            label:  the row you want to jump
+        
+        output:
+            rd:     PC register's content +1
+            pc:     label
     '''
 
     def jal(self, rd, label):
@@ -75,16 +76,17 @@ class Computer(object):
         return
 
     '''
-    Unconditional jump instruction
-
-    input:  jal rd,label
-    rd:     general register, such as r1
-    rs1:    general register, such as r1
-    imm:    
-
-    output:
-    rd:     PC register's content +1
-    pc:     rs1+imm
+        Unconditional jump instruction
+    
+        input:  
+            jal rd,label
+            rd:     general register, such as r1
+            rs1:    general register, such as r1
+            imm:    
+    
+        output:
+            rd:     PC register's content +1
+            pc:     rs1+imm
     '''
 
     def jalr(self, rd, rs1, imm):
@@ -93,15 +95,16 @@ class Computer(object):
         return
 
     '''
-    Conditional jump instruction, to jump when rs1 == rs2
-
-    input:  beq rs1,rs2,label
-    rs1:    general register, such as r1
-    rs2:    general register, such as r1
-    label:  the row you want to jump
-
-    output:
-    rd:PC register's content +1
+        Conditional jump instruction, to jump when rs1 == rs2
+    
+        input:  
+            beq rs1,rs2,label
+            rs1:    general register, such as r1
+            rs2:    general register, such as r1
+            label:  the row you want to jump
+    
+        output:
+            rd:PC register's content +1
     '''
 
     def beq(self, rs1, rs2, label):
@@ -115,61 +118,80 @@ class Computer(object):
         return
 
     def blt(self, rs1, rs2, label):
-        if self._load(rs1) < self._load(rs2):
+        if self._load(_operand=rs1, mode=1) < self._load(_operand=rs2, mode=1):
             self.reg_pc.save(0, int(label))
         return
 
     def bltu(self, rs1, rs2, label):
-        pass
+        if self._load(_operand=rs1) < self._load(_operand=rs2):
+            self.reg_pc.save(0, int(label))
+        return
 
     def bge(self, rs1, rs2, label):
-        pass
+        if self._load(_operand=rs1, mode=1) >= self._load(_operand=rs2, mode=1):
+            self.reg_pc.save(0, int(label))
+        return
 
     def bgeu(self, rs1, rs2, label):
-        pass
+        if self._load(_operand=rs1) >= self._load(_operand=rs2):
+            self.reg_pc.save(0, int(label))
+        return
 
     def lw(self, rd, rs1):
-        pass
+        self._save(_operand=rd, _content=self._load(_operand=rs1, mode=0), mode=0)
+        return
 
     def lh(self, rd, rs1):
-        pass
+        temp = self._load(_operand=rs1, mode=2, pos=16, size=16)
+        if temp[0] == 0:
+            self._save(_operand=rd, _content=int(temp, 2), mode=0)
+        else:
+            self._save(_operand=rd, _content=int(self._load(_operand=rs1, mode=1, pos=16, size=16), 2), mode=0)
+        return
 
     def lhu(self, rd, rs1):
-        pass
+        self._save(_operand=rd, _content=int(self._load(_operand=rs1, mode=2, pos=16, size=16), 2), mode=0)
+        return
 
     def lb(self, rd, rs1):
-        pass
+        temp = self._load(_operand=rs1, mode=2, pos=24, size=8)
+        if temp[0] == 0:
+            self._save(_operand=rd, _content=int(temp, 2), mode=0)
+        else:
+            self._save(_operand=rd, _content=int(self._load(_operand=rs1, mode=1, pos=24, size=8), 2), mode=0)
+        return
 
     def lbu(self, rd, rs1):
+        self._save(_operand=rd, _content=int(self._load(_operand=rs1, mode=2, pos=24, size=8), 2), mode=0)
+        return
+
+    def sw(self, rs2, rs1):
         pass
 
-    def sw(self, rd, rs1):
+    def sh(self, rs2, rs1):
         pass
 
-    def sh(self, rd, rs1):
+    def sb(self, rs2, rs1):
         pass
 
-    def sb(self, rd, rs1):
-        pass
-
-    def _load(self, _operand):
+    def _load(self, _operand, mode=0, pos=0, size=32):
         operand = str(_operand)
         num = operand[1:]
-        if operand[0] == "r" and num.isdigit():
-            return self.register.load(int(num))
-        elif operand[0] == "#" and num.isdigit():
-            return self.memory.load(int(num))
+        if operand[0] == "r":
+            return self.register.load(_no=int(num), mode=mode, _pos=pos, _size=size)
+        elif operand[0] == "#":
+            return self.memory.load(addr=int(num), mode=mode, _pos=pos, _size=size)
         else:
             print("load error\n")
             return
 
-    def _save(self, _operand, _content):
+    def _save(self, _operand, _content, mode=0):
         operand = str(_operand)
         content = str(_content)
         num = operand[1:]
-        if operand[0] == "r" and num.isdigit() and content.isdigit():
+        if operand[0] == "r":
             return self.register.save(int(num), int(content))
-        elif operand[0] == "#" and num.isdigit() and content.isdigit():
+        elif operand[0] == "#":
             return self.memory.save(int(num), int(content))
         else:
             print("save error\n")

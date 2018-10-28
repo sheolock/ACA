@@ -1,4 +1,17 @@
 class Register(object):
+    '''
+         function:
+             To initiate register
+
+         input:
+             amount:    the number of registers
+             bit:       the size of registers
+             content:   the initial content of registers
+
+         output:
+             null
+    '''
+
     def __init__(self, amount=32, bit=32, content=0):
         self.__r = []
         self.__bit = bit
@@ -31,7 +44,7 @@ class Register(object):
 
         output:
             null
-        '''
+    '''
 
     def save(self, _no=0, _content=0, mode=0):
         no = int(_no)
@@ -44,11 +57,14 @@ class Register(object):
                     content = content // 2
                 self.__r[no] = str(result)
             elif mode == 1:
-                content = content % (2 ** self.__bit)
+                content = content % (2 ** (self.__bit-1))
                 if content < 0:
                     self.__r[no] = bin(~int(bin(content ^ (2 ** self.__bit - 1)), 2))[3:]
                 else:
-                    self.__r[no] = bin(content)[2:]
+                    for i in range(self.__bit):
+                        result = str(content % 2) + result
+                        content = content // 2
+                    self.__r[no] = str(result)
         else:
             print("The register" + str(no) + "is not exist!\n")
         return
