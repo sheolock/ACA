@@ -166,13 +166,18 @@ class Computer(object):
         return
 
     def sw(self, rs2, rs1):
-        pass
+        self._save(_operand=rs1, _content=int(self._load(_operand=rs2)))
+        return
 
     def sh(self, rs2, rs1):
-        pass
+        content = self._load(_operand=rs2, mode=2, pos=16, size=16)
+        self._save(_operand=rs1, _content=content, mode=2,pos=16,size=16)
+        return
 
     def sb(self, rs2, rs1):
-        pass
+        content = self._load(_operand=rs2, mode=2, pos=24, size=8)
+        self._save(_operand=rs1, _content=content, mode=2, pos=24, size=8)
+        return
 
     def _load(self, _operand, mode=0, pos=0, size=32):
         operand = str(_operand)
@@ -180,19 +185,19 @@ class Computer(object):
         if operand[0] == "r":
             return self.register.load(_no=int(num), mode=mode, _pos=pos, _size=size)
         elif operand[0] == "#":
-            return self.memory.load(addr=int(num), mode=mode, _pos=pos, _size=size)
+            return self.memory.load(_addr=int(num), mode=mode)
         else:
             print("load error\n")
             return
 
-    def _save(self, _operand, _content, mode=0):
+    def _save(self, _operand, _content, mode=0, pos=0, size=32):
         operand = str(_operand)
         content = str(_content)
         num = operand[1:]
         if operand[0] == "r":
-            return self.register.save(int(num), int(content))
+            return self.register.save(int(num), content, mode, pos, size)
         elif operand[0] == "#":
-            return self.memory.save(int(num), int(content))
+            return self.memory.save(int(num), content, mode)
         else:
             print("save error\n")
             return

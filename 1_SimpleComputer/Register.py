@@ -41,23 +41,25 @@ class Register(object):
             mode:   save mode, 
                     0:  unsigned int
                     1:  signed int
+                    2:  binary
 
         output:
             null
     '''
 
-    def save(self, _no=0, _content=0, mode=0):
+    def save(self, _no=0, _content=0, mode=0, pos=0, size=32):
         no = int(_no)
-        content = int(_content)
         result = ""
         if no < len(self.__r):
             if mode == 0:
+                content = int(_content)
                 for i in range(self.__bit):
                     result = str(content % 2) + result
                     content = content // 2
                 self.__r[no] = str(result)
             elif mode == 1:
-                content = content % (2 ** (self.__bit-1))
+                content = int(_content)
+                content = content % (2 ** (self.__bit - 1))
                 if content < 0:
                     self.__r[no] = bin(~int(bin(content ^ (2 ** self.__bit - 1)), 2))[3:]
                 else:
@@ -65,6 +67,11 @@ class Register(object):
                         result = str(content % 2) + result
                         content = content // 2
                     self.__r[no] = str(result)
+            elif mode == 2:
+                content = self.load(no, 0, self.__bit, 2)
+                content = content[:pos] + _content + content[pos + size:]
+                content=content[:self.__bit]
+                self.__r[no] = content
         else:
             print("The register" + str(no) + "is not exist!\n")
         return
@@ -97,7 +104,7 @@ class Register(object):
             if mode == 0:
                 return int(str(self.__r[no]), 2)
             elif mode == 1:
-                if self.__r[no][0:1] == 0:
+                if self.__r[no][0:1] == "0":
                     return int(str(self.__r[no]), 2)
                 else:
                     return 0 - int(self.__r[no][1:], 2)
